@@ -7,6 +7,26 @@ app.use(cors());
 
 const server = http.createServer(app);
 
+const io = require('socket.io')(server, {
+  cors: {
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
 const PORT = parseInt(process.env.PORT) || 5678;
+
+io.on("connection", (socket) => {
+  console.log("A user connected.");
+
+  socket.on("disconnecting", () => {
+    console.log("A user is disconnecting.");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected.");
+  });
+});
 
 server.listen(PORT, () => console.log(`Those Who Know Server listening at port ${PORT}.`));
