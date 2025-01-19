@@ -1,0 +1,12 @@
+const GAME_STAGES = {
+  LOBBY: 'LOBBY',
+  PROMPT: 'PROMPT',
+  RESPONSE: 'RESPONSE',
+  ADVISING: 'ADVISING',
+  FEEDBACK: 'FEEDBACK',
+  SUMMARY: 'SUMMARY',
+};
+
+module.exports = {
+  GAME_STAGES,
+};
