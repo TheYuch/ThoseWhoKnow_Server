@@ -223,7 +223,13 @@ class Room {
 }
 
 const generateRoomCode = () => {
-  return Math.random().toString(36).substring(2, 15);
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let roomCode = "";
+  for (let i = 0; i < 4; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    roomCode += characters[randomIndex];
+  }
+  return roomCode;
 };
 
 const createRoom = (adminSocketId, username, callback) => {
