@@ -16,6 +16,7 @@ class Room {
     this.topicAgreed = false;
 
     this.badFeedbackCount = 0;
+    this.canSummary = false;
   }
 
   getOtherSocketId(socketId) { // private helper function
@@ -52,13 +53,12 @@ class Room {
 
   setPrompt(socketId, prompt, callback) {
     const player = getPlayer(socketId);
-    if (player.promptSubmitted) {
+    if (player.promptSubmitted) { // TODO: this should be done in the player class
       callback({ success: false, message: 'You have already submitted a prompt.' });
       return;
     }
-    player.promptSubmitted = true;
-    player.addSelfPrompt(prompt);
-    getPlayer(this.getOtherSocketId(socketId)).addOtherPrompt(prompt);
+    player.promptSubmitted = true; // TODO: this should be done in the player class
+    player.addPrompt(prompt);
 
     let numSubmitted = 0;
     for (const id of this.players) {
@@ -80,7 +80,7 @@ class Room {
       return;
     }
     player.responseSubmitted = true;
-    getPlayer(this.getOtherSocketId(socketId)).addResponse(response);
+    player.addResponse(response);
     
     let numSubmitted = 0;
     for (const id of this.players) {
@@ -102,8 +102,7 @@ class Room {
       return;
     }
     player.feedbackSubmitted = true;
-    const ret = getPlayer(this.getOtherSocketId(socketId)).addFeedback(feedback);
-    this.badFeedbackCount += ret ? 0 : 1;
+    this.badFeedbackCount += player.addFeedback(feedback) ? 0 : 1;
 
     let numSubmitted = 0;
     for (const id of this.players) {
@@ -113,6 +112,7 @@ class Room {
     }
     if (numSubmitted === this.players.length) {
       this.stage = constants.GAME_STAGES.FEEDBACK; // players receive each others' feedback
+      this.canSummary = this.badFeedbackCount === this.players.length || this.roundsPlayed >= constants.DEFAULT_ROUNDS;
     }
 
     callback({ success: true, message: 'Success!' });
@@ -134,14 +134,15 @@ class Room {
       this.stage = constants.GAME_STAGES.PROMPT;
       this.roundsPlayed++;
       this.badFeedbackCount = 0;
+      this.canSummary = false;
     }
 
     callback({ success: true, message: 'Success!' });
   }
 
   setSummary(socketId, callback) {
-    if (socketId !== this.adminSocketId) {
-      callback({ success: false, message: 'Only the admin can set the summary.' });
+    if (socketId !== this.adminSocketId || !this.canSummary) {
+      callback({ success: false, message: 'Must be admin with summary conditions met.' });
       return;
     }
 
@@ -172,6 +173,7 @@ class Room {
         getPlayer(id).resetTotal();
       }
       this.badFeedbackCount = 0;
+      this.canSummary = false;
     }
 
     callback({ success: true, message: 'Success!' });
@@ -186,7 +188,7 @@ class Room {
       roundsPlayed: this.roundsPlayed,
       topic: this.topic,
       topicAgreed: this.topicAgreed,
-      canSummary: this.badFeedbackCount === this.players.length  || this.roundsPlayed >= constants.DEFAULT_ROUNDS,
+      canSummary: this.canSummary,
       player: getPlayer(socketId).getSelfData(),
       otherPlayer: otherPlayerData,
     };

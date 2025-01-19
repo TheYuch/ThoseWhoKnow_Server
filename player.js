@@ -13,10 +13,9 @@ class Player {
     
     this.playAgainSubmitted = false;
 
-    this.selfPrompts = []; // from this player
-    this.otherPrompts = []; // from other player
-    this.responses = []; // from other player
-    this.feedback = []; // from other player
+    this.prompts = [];
+    this.responses = [];
+    this.feedback = [];
     this.summary = '';
   }
 
@@ -39,12 +38,8 @@ class Player {
     this.summary = '';
   }
 
-  addSelfPrompt(prompt) {
-    this.selfPrompts.push(prompt);
-  }
-
-  addOtherPrompt(prompt) {
-    this.otherPrompts.push(prompt);
+  addPrompt(prompt) {
+    this.prompts.push(prompt);
   }
 
   addResponse(response) {
@@ -63,10 +58,8 @@ class Player {
   getSelfData() {
     return {
       username: this.username,
-      selfPrompts: this.selfPrompts,
-      otherPrompts: this.otherPrompts,
+      prompts: this.prompts,
       responses: this.responses,
-      feedback: this.feedback,
       summary: this.summary,
     };
   }
@@ -79,6 +72,9 @@ class Player {
       feedbackSubmitted: this.feedbackSubmitted,
       nextQuestionSubmitted: this.nextQuestionSubmitted,
       playAgainSubmitted: this.playAgainSubmitted,
+      prompts: this.prompts,
+      responses: this.responses,
+      feedback: this.feedback,
     };
   }
 }
