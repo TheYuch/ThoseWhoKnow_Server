@@ -5,7 +5,14 @@ class Player {
     this.socketId = socketId;
     this.username = username;
     this.roomCode = roomCode;
+
+    this.promptSubmitted = false;
+    this.responseSubmitted = false;
+    this.feedbackSubmitted = false;
+    this.nextQuestionSubmitted = false;
     
+    this.playAgainSubmitted = false;
+
     this.selfPrompts = []; // from this player
     this.otherPrompts = []; // from other player
     this.responses = []; // from other player
@@ -13,7 +20,18 @@ class Player {
     this.summary = '';
   }
 
-  reset() {
+  resetIntermediate() {
+    this.promptSubmitted = false;
+    this.responseSubmitted = false;
+    this.feedbackSubmitted = false;
+    this.nextQuestionSubmitted = false;
+  }
+
+  resetTotal() {
+    this.resetIntermediate();
+
+    this.playAgainSubmitted = false;
+
     this.selfPrompts = [];
     this.otherPrompts = [];
     this.responses = [];
@@ -33,15 +51,16 @@ class Player {
     this.responses.push(response);
   }
 
-  addFeedback(feedback) {
+  addFeedback(feedback) { // returns whether the feedback is good
     this.feedback.push(feedback);
+    return feedback.good;
   }
 
   setSummary(summary) {
     this.summary = summary;
   }
 
-  getData() {
+  getSelfData() {
     return {
       username: this.username,
       selfPrompts: this.selfPrompts,
@@ -49,6 +68,17 @@ class Player {
       responses: this.responses,
       feedback: this.feedback,
       summary: this.summary,
+    };
+  }
+
+  getOtherData() {
+    return {
+      username: this.username,
+      promptSubmitted: this.promptSubmitted,
+      responseSubmitted: this.responseSubmitted,
+      feedbackSubmitted: this.feedbackSubmitted,
+      nextQuestionSubmitted: this.nextQuestionSubmitted,
+      playAgainSubmitted: this.playAgainSubmitted,
     };
   }
 }

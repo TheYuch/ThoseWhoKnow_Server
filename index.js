@@ -1,3 +1,5 @@
+import { createRoom, getPlayerRoom, joinPlayer, leavePlayer } from './room';
+
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -17,15 +19,23 @@ const io = require('socket.io')(server, {
 
 const PORT = parseInt(process.env.PORT) || 5678;
 
-io.on("connection", (socket) => {
-  console.log("A user connected.");
+io.on('connection', (socket) => {
+  console.log('A user connected.');
 
-  socket.on("disconnecting", () => {
-    console.log("A user is disconnecting.");
+  socket.on('createRoom', ({ roomCode, callback }) => {
+    createRoom(roomCode, socket.id, callback);
   });
 
-  socket.on("disconnect", () => {
-    console.log("A user disconnected.");
+  socket.on('joinRoom', ({ roomCode, username, callback }) => {
+    joinPlayer(socket.id, username, roomCode, callback);
+  });
+
+  socket.on('disconnecting', () => {
+    console.log('A user is disconnecting.');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected.');
   });
 });
 

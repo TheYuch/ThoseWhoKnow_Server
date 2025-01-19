@@ -7,6 +7,8 @@ const GAME_STAGES = {
   SUMMARY: 'SUMMARY',
 };
 
+const DEFAULT_ROUNDS = 3;
+
 module.exports = {
-  GAME_STAGES,
+  GAME_STAGES, DEFAULT_ROUNDS,
 };
