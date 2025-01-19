@@ -10,13 +10,13 @@ class Player {
     this.responseSubmitted = false;
     this.feedbackSubmitted = false;
     this.nextQuestionSubmitted = false;
-    
+
     this.playAgainSubmitted = false;
 
     this.prompts = [];
     this.responses = [];
     this.feedback = [];
-    this.summary = '';
+    this.summary = "";
   }
 
   resetIntermediate() {
@@ -35,7 +35,7 @@ class Player {
     this.otherPrompts = [];
     this.responses = [];
     this.feedback = [];
-    this.summary = '';
+    this.summary = "";
   }
 
   addPrompt(prompt) {
@@ -46,7 +46,8 @@ class Player {
     this.responses.push(response);
   }
 
-  addFeedback(feedback) { // returns whether the feedback is good
+  addFeedback(feedback) {
+    // returns whether the feedback is good
     this.feedback.push(feedback);
     return feedback.good;
   }
@@ -79,7 +80,7 @@ class Player {
   }
 }
 
-const createPlayer = (socketId, username) => {
+const createPlayer = (socketId, username, roomCode) => {
   const player = new Player(socketId, username, roomCode);
   players.set(socketId, player);
 };
@@ -93,5 +94,7 @@ const deletePlayer = (socketId) => {
 };
 
 module.exports = {
-  createPlayer, getPlayer, deletePlayer,
+  createPlayer,
+  getPlayer,
+  deletePlayer,
 };
