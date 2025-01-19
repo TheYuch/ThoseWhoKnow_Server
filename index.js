@@ -1,4 +1,4 @@
-import { createRoom, getPlayerRoom, joinPlayer, leavePlayer } from './room';
+const { createRoom, getPlayerRoom, joinPlayer, leavePlayer } = require('./room');
 
 const http = require('http');
 const express = require('express');
@@ -19,34 +19,90 @@ const io = require('socket.io')(server, {
 
 const PORT = parseInt(process.env.PORT) || 5678;
 
+const emitUpdateGameState = (socket, room) => {
+  room.players.forEach((id) => {
+    const state = room.getGameState(id);
+    state['isAdmin'] = id === room.adminSocketId;
+    socket.emit('updateGameState', state);
+  });
+};
+
 io.on('connection', (socket) => {
   console.log('A user connected.');
 
-  socket.on('createRoom', ({ roomCode, callback }) => createRoom(roomCode, socket.id, callback));
+  socket.on('createRoom', ({ roomCode }, callback) => {
+    createRoom(roomCode, socket.id, callback);
+    const state = getPlayerRoom(socket.id).getGameState(socket.id);
+    state['isAdmin'] = true;
+    socket.emit('updateGameState', state);
+  });
 
-  socket.on('joinRoom', ({ roomCode, username, callback }) => joinPlayer(socket.id, username, roomCode, callback));
+  socket.on('joinRoom', ({ roomCode, username }, callback) => {
+    joinPlayer(socket.id, username, roomCode, callback);
+    emitUpdateGameState(socket, getPlayerRoom(socket.id));
+  });
 
-  socket.on('submitTopic', ({ topic, callback }) => getPlayerRoom(socket.id).setTopic(socket.id, topic, callback));
+  socket.on('submitTopic', ({ topic }, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setTopic(socket.id, topic, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('agreeTopic', ({ callback }) => getPlayerRoom(socket.id).agreeTopic(socket.id, callback));
+  socket.on('agreeTopic', ({}, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.agreeTopic(socket.id, callback)
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('startPrompt', ({ callback }) => getPlayerRoom(socket.id).startPrompt(socket.id, callback));
+  socket.on('startPrompt', ({}, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.startPrompt(socket.id, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('submitPrompt', ({ prompt, callback }) => getPlayerRoom(socket.id).setPrompt(socket.id, prompt, callback));
+  socket.on('submitPrompt', ({ prompt }, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setPrompt(socket.id, prompt, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('submitResponse', ({ response, callback }) => getPlayerRoom(socket.id).setResponse(socket.id, response, callback));
+  socket.on('submitResponse', ({ response }, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setResponse(socket.id, response, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('submitFeedback', ({ feedback, callback }) => getPlayerRoom(socket.id).setFeedback(socket.id, feedback, callback));
+  socket.on('submitFeedback', ({ feedback }, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setFeedback(socket.id, feedback, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('submitNextQuestion', ({ callback }) => getPlayerRoom(socket.id).setNextQuestion(socket.id, callback));
+  socket.on('submitNextQuestion', ({}, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setNextQuestion(socket.id, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('submitSummary', ({ callback }) => getPlayerRoom(socket.id).setSummary(socket.id, callback));
+  socket.on('submitSummary', ({}, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setSummary(socket.id, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('submitPlayAgain', ({ callback }) => getPlayerRoom(socket.id).setPlayAgain(socket.id, callback));
+  socket.on('submitPlayAgain', ({}, callback) => {
+    const room = getPlayerRoom(socket.id);
+    room.setPlayAgain(socket.id, callback);
+    emitUpdateGameState(socket, room);
+  });
 
-  socket.on('disconnecting', () => leavePlayer(socket.id));
+  socket.on('disconnecting', () => {
+    leavePlayer(socket.id);
+  });
 
-  socket.on('disconnect', () => console.log('A user disconnected.'));
+  socket.on('disconnect', () => {
+    console.log('A user disconnected.');
+  });
 });
 
 server.listen(PORT, () => console.log(`Those Who Know Server listening at port ${PORT}.`));
