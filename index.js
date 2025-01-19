@@ -89,9 +89,9 @@ io.on("connection", (socket) => {
     emitUpdateGameState(socket, room);
   });
 
-  socket.on("submitSummary", ({}, callback) => {
+  socket.on("submitSummary", async ({}, callback) => {
     const room = getPlayerRoom(socket.id);
-    room.setSummary(socket.id, callback);
+    await room.setSummary(socket.id, callback);
     emitUpdateGameState(socket, room);
   });
 

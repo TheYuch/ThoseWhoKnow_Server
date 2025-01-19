@@ -1,5 +1,6 @@
 const { createPlayer, getPlayer, deletePlayer } = require("./player");
 const constants = require("./constants");
+const { llmSummary } = require("./utils");
 
 const rooms = new Map();
 
@@ -58,7 +59,6 @@ class Room {
     }
     this.stage = constants.GAME_STAGES.PROMPT;
     this.roundsPlayed++;
-    console.log(this.stage);
     callback({ success: true, message: "Success!" });
   }
 
@@ -115,13 +115,13 @@ class Room {
 
   setFeedback(socketId, feedback, callback) {
     const player = getPlayer(socketId);
-    // if (player.feedbackSubmitted) {
-    //   callback({
-    //     success: false,
-    //     message: "You have already submitted a feedback.",
-    //   });
-    //   return;
-    // }
+    if (player.feedbackSubmitted) {
+      callback({
+        success: false,
+        message: "You have already submitted a feedback.",
+      });
+      return;
+    }
     player.feedbackSubmitted = true;
     this.badFeedbackCount += player.addFeedback(feedback) ? 0 : 1;
 
@@ -163,7 +163,7 @@ class Room {
     callback({ success: true, message: "Success!" });
   }
 
-  setSummary(socketId, callback) {
+  async setSummary(socketId, callback) {
     if (socketId !== this.adminSocketId || !this.canSummary) {
       callback({
         success: false,
@@ -172,9 +172,11 @@ class Room {
       return;
     }
 
-    // TODO: add LLM summary generation here
     for (const id of this.players) {
-      getPlayer(id).setSummary("TMP summary here");
+      const player = getPlayer(id);
+      const otherPlayer = getPlayer(this.getOtherSocketId(id));
+      const summary = await llmSummary(otherPlayer.prompts, player.responses, otherPlayer.feedback);
+      getPlayer(id).setSummary(summary);
     }
     this.stage = constants.GAME_STAGES.SUMMARY;
 
